@@ -3,8 +3,8 @@
 from distutils.core import setup
 
 setup(
-    name='rexp',
-    version='0.0.1',
+    name='RexP',
+    version='0.0.2',
     packages=['rexp'],
     description='Simple pattern compiler library',
     author='Ebubekir Dirican',
