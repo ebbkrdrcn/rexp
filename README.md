@@ -1,6 +1,6 @@
 # RexP
 
-Pattern Compiler Library
+Simple Pattern Compiler Library
 
 ```python
 pip install rexp
