@@ -44,8 +44,6 @@ class DateTimePattern(Pattern):
 
         return f
 
-
-
 class IPAddressPattern(Pattern):
     __V4_EXPR = r'([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})'
     __V6_EXPR = r'((([0-9A-Fa-f]{1,4}:){1,6}:)|(([0-9A-Fa-f]{1,4}:){7}))([0-9A-Fa-f]{1,4})'
@@ -62,10 +60,14 @@ class RegexPattern(Pattern):
         return False
 
     def __call__(self, *args, **kwargs):
+        if not len(args):
+            raise ValueError('Invalid expression!')
+
         return args[0]
 
 class RegexGroupPattern(Pattern):
     def __call__(self, *args, **kwargs):
+        # TODO: validate.
         is_negative = kwargs['is_negative'] or False
         return '[%s%s]' % ('^' if is_negative else '', args[0])
 
@@ -84,7 +86,7 @@ class KeyValuePairPattern(Pattern):
         sep = r'=' if not len(args) else args[0]
         esced = re.escape(sep)
         cn = kwargs['capture_name']
-        return r'\b(?P<{1}key>[^{0}\s]+)\s*{0}\s*(?P<{1}value>[^{0}]+)[\b\,\;]'.format(
+        return r'\b(?P<{1}key>[^{0}\s]+)\s*{0}\s*(?P<{1}value>[^{0}]+)([\b\,\;]|$)'.format(
             sep if sep == esced else esced, '%s_' % cn if cn else '')
 
 DEFAULT_PATTERN_SET = dict(

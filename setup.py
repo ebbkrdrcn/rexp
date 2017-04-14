@@ -4,7 +4,7 @@ from distutils.core import setup
 
 setup(
     name='RexP',
-    version='0.0.4',
+    version='0.0.5',
     packages=['rexp'],
     description='Simple pattern compiler library',
     author='Ebubekir Dirican',
