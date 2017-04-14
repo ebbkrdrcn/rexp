@@ -14,6 +14,7 @@ class DateTimePattern(Pattern):
 
     def __init__(self):
         self.__wildcards = [
+            ('c', r'\d{3,6}'),
             ('d', r'(([0-2][0-9])|(3[0-1]))'),
             ('H', r'(([0-1][0-9])|(2[0-3]))'),
             ('I', r'((0[0-9])|(1[0-2]))'),
