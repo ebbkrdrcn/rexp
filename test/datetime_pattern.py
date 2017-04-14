@@ -12,7 +12,7 @@ class DateTimePatternTestMethods(unittest.TestCase):
         e6 = callable('T%H:%M:%S')
         e7 = callable('%z')
 
-        date = '1994-11-05T08:15:30-05:00'
+        date = '1994-10-05T08:15:30-05:00'
 
         m1 = re.search(e1, date)
         self.assertEqual(m1.group(0), '1994')
