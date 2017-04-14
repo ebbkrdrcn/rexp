@@ -1,5 +1,5 @@
 import unittest, re
-from src.compiler import PatternCompiler
+from rexp.compiler import PatternCompiler
 
 class CompilerTestMethods(unittest.TestCase):
     def test_compile_1(self):

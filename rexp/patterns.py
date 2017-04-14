@@ -11,9 +11,41 @@ class Pattern(object):
         return '' if not len(args) else re.escape(args[0])
 
 class DateTimePattern(Pattern):
+    WILDCARD_RE = re.compile(r'%(?P<c>((?!%)[a-zA-Z])|%)', re.IGNORECASE)
+
+    def __init__(self):
+        self.__wildcards = [
+            ('d', r'(([0-2][0-9])|(3[01]))'),
+            ('H', r'(([0-1][0-9])|(2[0-3]))'),
+            ('I', r'((0[0-9])|(1[12]))'),
+            ('m', r'((0[0-9])|(1[12]))'),
+            ('M', r'([0-5][0-9])'),
+            ('p', r'((AM)|(PM))'),
+            ('S', r'(([0-5][0-9])|(6[0-1]))'),
+            ('Y', r'((?:19|20)[0-9]{2})'),
+            ('y', r'([0-9]{2})'),
+            ('z', r'((-|\+)(([0-1][0-9])|(2[0-3])):([0-5][0-9]))'),
+            ('%', r'(%)')
+        ]
 
     def __call__(self, *args, **kwargs):
-        return ''
+        if not len(args):
+            raise ValueError('Invalid format')
+
+        f = str(args[0])
+        l = []
+        for x in self.WILDCARD_RE.finditer(f):
+            c = x.group('c')
+            w = [x for x in self.__wildcards if x[0] == c]
+            if len(w):
+                l.append(w[0])
+
+        for x in l:
+            f = f.replace('%{0}'.format(x[0]), x[1])
+
+        return f
+
+
 
 class IPAddressPattern(Pattern):
 
@@ -60,7 +92,6 @@ class KeyValuePairPattern(Pattern):
         cn = kwargs['capture_name']
         return r'\b(?P<{1}key>[^{0}\s]+)\s*{0}\s*(?P<{1}value>[^{0}]+)[\b\,\;]'.format(
             sep if sep == esced else esced, '%s_' % cn if cn else '')
-
 
 DEFAULT_PATTERN_SET = dict(
     RE=RegexPattern(),
