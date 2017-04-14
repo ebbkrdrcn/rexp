@@ -51,7 +51,7 @@ class IPAddressPattern(Pattern):
 
     def __call__(self, *args, **kwargs):
         if not len(args) or not re.match(r'^(v4)|(v6)$', args[0]):
-            raise ValueError('Invalid IP address type!')
+            return r'(%s|%s)' % (self.__V4_EXPR, self.__V6_EXPR)
 
         return self.__V6_EXPR  if str(args[0]).lower() == 'v6' \
             else self.__V4_EXPR
