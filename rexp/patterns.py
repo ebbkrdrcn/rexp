@@ -3,7 +3,6 @@
 import re
 
 class Pattern(object):
-
     def escepable(self):
         return True
 
@@ -48,19 +47,17 @@ class DateTimePattern(Pattern):
 
 
 class IPAddressPattern(Pattern):
-
-    __V4_EXPR = r'\b([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})\b'
-    __V6_EXPR = r'\b((([0-9A-Fa-f]{1,4}:){1,6}:)|(([0-9A-Fa-f]{1,4}:){7}))([0-9A-Fa-f]{1,4})\b'
+    __V4_EXPR = r'([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})'
+    __V6_EXPR = r'((([0-9A-Fa-f]{1,4}:){1,6}:)|(([0-9A-Fa-f]{1,4}:){7}))([0-9A-Fa-f]{1,4})'
 
     def __call__(self, *args, **kwargs):
-        if not len(args):
+        if not len(args) or not re.match(r'^(v4)|(v6)$', args[0]):
             raise ValueError('Invalid IP address type!')
 
-        return self.__V6_EXPR if not (args[0] or '').lower() == 'v6' \
+        return self.__V6_EXPR  if str(args[0]).lower() == 'v6' \
             else self.__V4_EXPR
 
 class RegexPattern(Pattern):
-
     def escepable(self):
         return False
 
@@ -68,13 +65,11 @@ class RegexPattern(Pattern):
         return args[0]
 
 class RegexGroupPattern(Pattern):
-
     def __call__(self, *args, **kwargs):
         is_negative = kwargs['is_negative'] or False
         return '[%s%s]' % ('^' if is_negative else '', args[0])
 
 class RegexNotPattern(Pattern):
-
     def escepable(self):
         return False
 
@@ -82,7 +77,6 @@ class RegexNotPattern(Pattern):
         return '(?!%s)' % args[0]
 
 class KeyValuePairPattern(Pattern):
-
     def escepable(self):
         return False
 
