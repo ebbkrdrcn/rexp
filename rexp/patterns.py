@@ -9,6 +9,40 @@ class Pattern(object):
     def __call__(self, *args, **kwargs):
         return '' if not len(args) else re.escape(args[0])
 
+class RegexPattern(Pattern):
+    def escepable(self):
+        return False
+
+    def __call__(self, *args, **kwargs):
+        if not len(args):
+            raise ValueError('Invalid expression!')
+
+        return args[0]
+
+class RegexGroupPattern(Pattern):
+    def __call__(self, *args, **kwargs):
+        # TODO: validate.
+        is_negative = kwargs['is_negative'] or False
+        return '[%s%s]' % ('^' if is_negative else '', args[0])
+
+class RegexNotPattern(Pattern):
+    def escepable(self):
+        return False
+
+    def __call__(self, *args, **kwargs):
+        return '(?!%s)' % args[0]
+
+class KeyValuePairPattern(Pattern):
+    def escepable(self):
+        return False
+
+    def __call__(self, *args, **kwargs):
+        sep = r'=' if not len(args) else args[0]
+        esced = re.escape(sep)
+        cn = kwargs['capture_name']
+        return r'\b(?P<{1}key>[^{0}\s]+)\s*{0}\s*(?P<{1}value>[^{0}]+)([\b\,\;]|$)'.format(
+            sep if sep == esced else esced, '%s_' % cn if cn else '')
+
 class DateTimePattern(Pattern):
     WILDCARD_RE = re.compile(r'%(?P<c>((?!%)[a-zA-Z])|%)', re.IGNORECASE)
 
@@ -56,39 +90,17 @@ class IPAddressPattern(Pattern):
         return self.__V6_EXPR  if str(args[0]).lower() == 'v6' \
             else self.__V4_EXPR
 
-class RegexPattern(Pattern):
-    def escepable(self):
-        return False
-
+class PathPattern(Pattern):
     def __call__(self, *args, **kwargs):
-        if not len(args):
-            raise ValueError('Invalid expression!')
+        sep = '/'
+        if len(args) > 0:
+            sep = str(args[0]).strip()
 
-        return args[0]
+        if not re.match(r'(\/|\\)', sep):
+            raise ValueError('Invalid path seperator!')
 
-class RegexGroupPattern(Pattern):
-    def __call__(self, *args, **kwargs):
-        # TODO: validate.
-        is_negative = kwargs['is_negative'] or False
-        return '[%s%s]' % ('^' if is_negative else '', args[0])
-
-class RegexNotPattern(Pattern):
-    def escepable(self):
-        return False
-
-    def __call__(self, *args, **kwargs):
-        return '(?!%s)' % args[0]
-
-class KeyValuePairPattern(Pattern):
-    def escepable(self):
-        return False
-
-    def __call__(self, *args, **kwargs):
-        sep = r'=' if not len(args) else args[0]
-        esced = re.escape(sep)
-        cn = kwargs['capture_name']
-        return r'\b(?P<{1}key>[^{0}\s]+)\s*{0}\s*(?P<{1}value>[^{0}]+)([\b\,\;]|$)'.format(
-            sep if sep == esced else esced, '%s_' % cn if cn else '')
+        return r'({0}(\{1}[^\{1}]+)+(\{1}$)?)'\
+            .format('([a-zA-Z]+:)' if sep == '\\' else '', sep)
 
 DEFAULT_PATTERN_SET = dict(
     RE=RegexPattern(),
@@ -104,9 +116,14 @@ DEFAULT_PATTERN_SET = dict(
     STR=r'("["]+")|(\'[\'+]\')',
     WORD=r'\b\w+\b',
     WORDS=r'\b(\w+\s*)*\b',
+    PATH=PathPattern(),
+    URL=r'https?:\/\/(([^\/]+)(\/[^\/|?]*))(\?[^&]+(&[^&]+)*)',
+    RELATIVE_URL=r'((\/[^\/|?]+)+)(\?[^&]+(&[^&]+)*)',
     DATE=DateTimePattern(),
     IP=IPAddressPattern(),
     IP4='${IP(v4)}',
     IP6='${IP(v6)}',
+    IPV4='${IP(v4)}',
+    IPV6='${IP(v6)}',
     PAIR=KeyValuePairPattern()
 )

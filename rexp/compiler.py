@@ -4,7 +4,6 @@ import re
 from patterns import *
 
 class PatternCompiler(object):
-
     VALID_PATTERN_RE = re.compile(r'(^\$(\d+)?\{(\w+)(?:\((.+)\))?([\*\+\?|!])?\}?$)')
     REGEX_SPECIALS_RE = re.compile(r'([\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|])', re.MULTILINE | re.DOTALL)
     CAPTURE_INDEX_RE = re.compile(r'(\$\d+)')
