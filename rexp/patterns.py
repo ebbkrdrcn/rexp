@@ -38,10 +38,16 @@ class KeyValuePairPattern(Pattern):
 
     def __call__(self, *args, **kwargs):
         sep = r'=' if not len(args) else args[0]
-        esced = re.escape(sep)
+        sep_esced = re.escape(sep)
+
+        post_check = r'[\,\;\b]' if len(args) < 2 else args[1]
+        post_check_esced = re.escape(post_check)
+
         cn = kwargs['capture_name']
-        return r'\b(?P<{1}key>[^{0}\s]+)\s*{0}\s*(?P<{1}value>[^{0}]+)([\b\,\;]|$)'.format(
-            sep if sep == esced else esced, '%s_' % cn if cn else '')
+        return r'\b(?P<{2}key>[^{0}\s]+)\s*{0}\s*(?P<{2}value>[^{0}]+)(({1})|$)'.format(
+            sep if sep == sep_esced else sep_esced,
+            post_check if post_check == post_check_esced else post_check_esced,
+            '%s_' % cn if cn else '', )
 
 class DateTimePattern(Pattern):
     WILDCARD_RE = re.compile(r'%(?P<c>((?!%)[a-zA-Z])|%)', re.IGNORECASE)
