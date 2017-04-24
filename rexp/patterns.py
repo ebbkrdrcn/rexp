@@ -2,12 +2,14 @@
 
 import re
 
+
 class Pattern(object):
     def escepable(self):
         return True
 
     def __call__(self, *args, **kwargs):
         return '' if not len(args) else re.escape(args[0])
+
 
 class RegexPattern(Pattern):
     def escepable(self):
@@ -19,11 +21,13 @@ class RegexPattern(Pattern):
 
         return args[0]
 
+
 class RegexGroupPattern(Pattern):
     def __call__(self, *args, **kwargs):
         # TODO: validate.
         is_negative = kwargs['is_negative'] or False
         return '[%s%s]' % ('^' if is_negative else '', args[0])
+
 
 class RegexNotPattern(Pattern):
     def escepable(self):
@@ -31,6 +35,7 @@ class RegexNotPattern(Pattern):
 
     def __call__(self, *args, **kwargs):
         return '(?!%s)' % args[0]
+
 
 class KeyValuePairPattern(Pattern):
     def escepable(self):
@@ -48,6 +53,7 @@ class KeyValuePairPattern(Pattern):
             sep if sep == sep_esced else sep_esced,
             post_check if post_check == post_check_esced else post_check_esced,
             '%s_' % cn if cn else '', )
+
 
 class DateTimePattern(Pattern):
     WILDCARD_RE = re.compile(r'%(?P<c>((?!%)[a-zA-Z])|%)', re.IGNORECASE)
@@ -85,6 +91,7 @@ class DateTimePattern(Pattern):
 
         return f
 
+
 class IPAddressPattern(Pattern):
     __V4_EXPR = r'([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})'
     __V6_EXPR = r'((([0-9A-Fa-f]{1,4}:){1,6}:)|(([0-9A-Fa-f]{1,4}:){7}))([0-9A-Fa-f]{1,4})'
@@ -93,8 +100,9 @@ class IPAddressPattern(Pattern):
         if not len(args) or not re.match(r'^(v4)|(v6)$', args[0]):
             return r'(%s|%s)' % (self.__V4_EXPR, self.__V6_EXPR)
 
-        return self.__V6_EXPR  if str(args[0]).lower() == 'v6' \
+        return self.__V6_EXPR if str(args[0]).lower() == 'v6' \
             else self.__V4_EXPR
+
 
 class PathPattern(Pattern):
     def __call__(self, *args, **kwargs):
@@ -105,8 +113,24 @@ class PathPattern(Pattern):
         if not re.match(r'(\/|\\)', sep):
             raise ValueError('Invalid path seperator!')
 
-        return r'({0}(\{1}[^\{1}]+)+(\{1}$)?)'\
+        return r'({0}(\{1}[^\{1}]+)+(\{1}$)?)' \
             .format('([a-zA-Z]+:)' if sep == '\\' else '', sep)
+
+
+class UUIDPattern(Pattern):
+    def __init__(self):
+        self.__format = r'[0-9a-f]{8}-[0-9a-f]{4}-%s[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}'
+
+    def __call__(self, *args, **kwargs):
+        if len(args):
+            ver = int(args[0])
+            if ver > 0 and ver < 6:
+                return self.__format % ver
+
+            raise ValueError('Invalid uuid version!')
+
+        return self.__format % '[1-5]'
+
 
 DEFAULT_PATTERN_SET = dict(
     RE=RegexPattern(),
@@ -131,5 +155,11 @@ DEFAULT_PATTERN_SET = dict(
     IP6='${IP(v6)}',
     IPV4='${IP(v4)}',
     IPV6='${IP(v6)}',
+    UUID=UUIDPattern(),
+    UUID1='${UUID(1)}',
+    UUID2='${UUID(2)}',
+    UUID3='${UUID(3)}',
+    UUID4='${UUID(4)}',
+    UUID5='${UUID(5)}',
     PAIR=KeyValuePairPattern()
 )
