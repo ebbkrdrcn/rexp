@@ -1,7 +1,5 @@
-#!/usr/bin/python
+from .patterns import *
 
-import re
-from patterns import *
 
 class PatternCompiler(object):
     VALID_PATTERN_RE = re.compile(r'(^\$(\d+)?\{(\w+)(?:\((.+)\))?([\*\+\?|!])?\}?$)')
@@ -14,14 +12,18 @@ class PatternCompiler(object):
         if pattern_set:
             self.register(pattern_set)
 
-    def register(self, pattern_set=dict()):
+    def register(self, pattern_set=None):
+        if pattern_set is None:
+            pattern_set = {}
         self.__pattern_set.update(pattern_set)
 
-    def compile(self, pattern, capture_names=list()):
+    def compile(self, pattern, capture_names=None):
+        if capture_names is None:
+            capture_names = []
         exprs = self.__split(pattern)
         compiled = self.__escape(pattern)
         compiled = re.sub(r'(^\s+)|(\s+$)', '', compiled)
-        compiled = re.sub(r'\s+', '\s+', compiled)
+        compiled = re.sub(r'\s+', '\\\\s+', compiled)
         for expr in exprs:
             p = self.__compile_expr(expr, capture_names)
             if p:
@@ -91,7 +93,7 @@ class PatternCompiler(object):
     def __escape(self, input):
         return self.REGEX_SPECIALS_RE.sub(r'\\\1', input)
 
-    def __compile_expr(self, expr, capture_names=list()):
+    def __compile_expr(self, expr, capture_names=[]):
         match = self.VALID_PATTERN_RE.match(expr)
         if not match:
             return None
@@ -107,7 +109,7 @@ class PatternCompiler(object):
         if callable(result):
             if g[3]:
                 result = result(self.__escape(g[3]) if result.escepable() \
-                                else g[3], capture_name=gn, is_negative=is_negative)
+                                    else g[3], capture_name=gn, is_negative=is_negative)
             else:
                 result = result(capture_name=gn)
 

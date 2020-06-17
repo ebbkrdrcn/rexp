@@ -18,10 +18,10 @@ class DateTimePatternTestMethods(unittest.TestCase):
         self.assertEqual(m1.group(0), '1994')
 
         m2 = re.search(e2, date)
-        self.assertEqual(m2.group(0), '1994-11')
+        self.assertEqual(m2.group(0), '1994-10')
 
         m3 = re.search(e3, date)
-        self.assertEqual(m3.group(0), '1994-11-05')
+        self.assertEqual(m3.group(0), '1994-10-05')
 
         m4 = re.search(e4, date)
         a = m4.group(0)
@@ -36,10 +36,10 @@ class DateTimePatternTestMethods(unittest.TestCase):
         m7 = re.search(e7, date)
         self.assertEqual(m7.group(0), '-05:00')
 
-        date1 = '1994-11-05%08:15:30-05:00'
-        e8 = callable('%Y-%m-%d%%%H:%M:%S')
+        date1 = '1994-11-05T08:15:30-05:00'
+        e8 = callable('%Y-%m-%dT%H:%M:%S%z')
         m8 = re.search(e8, date1)
-        self.assertEqual(m8.group(0), '1994-11-05%08:15:30')
+        self.assertEqual(m8.group(0), '1994-11-05T08:15:30-05:00')
 
 
 
